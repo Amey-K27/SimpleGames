@@ -1,12 +1,27 @@
-import pygame,time
+import pygame,time,random
 from pygame.locals import *
+
+class Apple():
+    def __init__(self,surface) -> None:
+        self.parent_screen=surface
+        self.image=pygame.image.load("resources/apple.jpg").convert()
+        self.x=0
+        self.y=0
+    
+    def draw(self):
+        self.parent_screen.blit(self.image, (self.x, self.y))
+        pygame.display.flip()
+    
+    def move(self):
+        self.x=random.randint(1,9)*40
+        self.y=random.randint(1,9)*40
 
 class Snake():
     def __init__(self,surface) -> None:
         self.parent_screen=surface
-        self.block=pygame.image.load("resources/block.jpg").convert()
-        self.x=100
-        self.y=100
+        self.block=pygame.image.load("resources/block.jpg").convert()   #size of block is 40*40
+        self.x=0
+        self.y=0
         self.direction="down" 
     
     def move_left(self):
@@ -23,13 +38,13 @@ class Snake():
     
     def walk(self):
         if self.direction=="left":
-            self.x-=10
+            self.x-=40
         if self.direction=="right":
-            self.x+=10
+            self.x+=40
         if self.direction=="up":
-            self.y-=10
+            self.y-=40
         if self.direction=="down":
-            self.y+=10
+            self.y+=40
         self.draw()
 
     def draw(self):
@@ -40,9 +55,11 @@ class Snake():
 class Game():
     def __init__(self) -> None:
         pygame.init()
-        self.surface=pygame.display.set_mode((500,500))
+        self.surface=pygame.display.set_mode((400,400))
         self.snake=Snake(self.surface)
         self.snake.draw()
+        self.apple=Apple(self.surface)
+        self.apple.draw()
     
     def run(self):
         running =True
@@ -63,8 +80,12 @@ class Game():
 
                     if event.key == K_DOWN:
                         self.snake.move_down()
+                    
+                    if event.key == K_n:
+                        self.apple.move()
             self.snake.walk()
-            time.sleep(.2)
+            self.apple.draw()
+            time.sleep(.5)
 if __name__=="__main__":
     game=Game()
     game.run()
