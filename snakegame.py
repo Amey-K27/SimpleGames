@@ -83,16 +83,23 @@ class Game():
         font = pygame.font.SysFont('arial',30)
         score = font.render(f"Score: {self.snake.length}",True,(200,200,200))
         self.surface.blit(score,(100,100))
+        pygame.display.flip()
+
 
     def play(self):
         self.snake.walk()
         self.apple.draw()
-        self.display_score()
         pygame.display.flip()
 
         if self.is_collision(self.snake.x[0],self.snake.y[0],self.apple.x,self.apple.y):
             self.snake.increase_length()
             self.apple.move()
+
+        for i in range(2, self.snake.length):
+            if self.is_collision(self.snake.x[0], self.snake.y[0], self.snake.x[i], self.snake.y[i]):
+                return False
+        
+        return True
 
     def run(self):
         running =True
@@ -114,9 +121,12 @@ class Game():
                     if event.key == K_DOWN:
                         self.snake.move_down()
 
-            self.play()
-            time.sleep(1)
-        
+            if self.play()==False:
+                break
+            else:
+                time.sleep(1)
+        self.display_score()
+        time.sleep(5)
 if __name__=="__main__":
     game=Game()
     game.run()
