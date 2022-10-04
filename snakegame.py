@@ -10,8 +10,8 @@ class Apple():
         self.y=0
     
     def draw(self):
+        self.parent_screen.fill((110, 110, 5))
         self.parent_screen.blit(self.image, (self.x, self.y))
-        pygame.display.flip()
     
     def move(self):
         self.x=random.randint(1,9)*SIZE
@@ -55,10 +55,8 @@ class Snake():
         self.draw()
 
     def draw(self):
-        self.parent_screen.fill((110, 110, 5))
         for i in range(self.length):
             self.parent_screen.blit(self.block, (self.x[i], self.y[i]))
-        pygame.display.flip() 
     
     def increase_length(self):
         self.length += 1
@@ -70,9 +68,7 @@ class Game():
         pygame.init()
         self.surface=pygame.display.set_mode((400,400))
         self.snake=Snake(self.surface,5)
-        self.snake.draw()
         self.apple=Apple(self.surface)
-        self.apple.draw()
     
     def is_collision(self,x1,y1,x2,y2):
         if (x1==x2 and y1==y2):
@@ -87,9 +83,10 @@ class Game():
 
 
     def play(self):
-        self.snake.walk()
-        self.apple.draw()
+        self.apple.draw() 
+        self.snake.walk()       
         pygame.display.flip()
+        
 
         if self.is_collision(self.snake.x[0],self.snake.y[0],self.apple.x,self.apple.y):
             self.snake.increase_length()
@@ -124,9 +121,9 @@ class Game():
             if self.play()==False:
                 break
             else:
-                time.sleep(1)
+                time.sleep(.5)
         self.display_score()
-        time.sleep(5)
+        time.sleep(3)
 if __name__=="__main__":
     game=Game()
     game.run()
