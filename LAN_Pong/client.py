@@ -28,7 +28,6 @@ def client_to_client_pong(msg):
 def client_side_running(message):
     clock=pygame.time.Clock()
     clock.tick(FPS)
-    user_input=""
     left_score,right_score=int(message[0]),int(message[1])
     left_paddle_x,left_paddle_y=int(message[2]),int(message[3])
     right_paddle_x,right_paddle_y=int(message[4]),int(message[5])
@@ -37,16 +36,21 @@ def client_side_running(message):
     for event in pygame.event.get():
         if event.type==pygame.QUIT:
             pygame.quit()
+    userInput()
+    
+def userInput():   
+    user_input="none"
     keys = pygame.key.get_pressed()
     if keys[pygame.K_UP]:
-        user_input='right_peddle'+","+'up'
+        user_input='right_paddle'+","+'up'
     elif keys[pygame.K_DOWN]:
-        user_input='right_peddle'+","+'down'
+        user_input='right_paddle'+","+'down'
     elif keys[pygame.K_w]:
-        user_input='left_peddle'+","+'up'
+        user_input='left_paddle'+","+'up'
     elif keys[pygame.K_s]:
-        user_input='left_peddle'+","+'down'
-    write(user_input)
+        user_input='left_paddle'+","+'down'
+    print(user_input)
+    return user_input
 
 def draw(left_score,right_score,left_paddle_x,left_paddle_y,right_paddle_x,right_paddle_y,ball_x,ball_y):
     WIN.fill(BLACK)
@@ -79,9 +83,12 @@ username=input("Please enter your user name: ")
 def receive():
     try:
         message=client.recv(2048).decode('utf-8')
-        print("msg is ", message)
+        #print("msg is ", message)
         if message=='Client_Name':
             client.send(username.encode('utf-8'))
+        elif message=='user_input':
+            user_input=userInput()
+            write(user_input)
         else:
             client_to_client_pong(message)
     except Exception as e:
@@ -97,4 +104,3 @@ def write(data):
 
 while True:
     receive()
-

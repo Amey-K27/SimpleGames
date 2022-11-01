@@ -47,19 +47,21 @@ class Ball:
         self.y_vel=0
         self.x_vel*=-1
 
-def move_peddle(data):
+def move_paddle(data,left_paddle,right_paddle):
+    #print("data",data)
     if data:
         user_input=data.split(",")
-        if user_input[0]=="right_peddle":
-            if user_input[1]=="up" and main().right_peddle.y-main().right_peddle.vel>=0:
-                main().right_peddle.move(up=True)
-            if user_input[1]=="down" and main().right_peddle.y+main().right_peddle.vel+main().right_peddle.height<=HEIGHT:
-                main().right_peddle.move(up=False)
+        #print("user_input",user_input)
+        if user_input[0]=="right_paddle":
+            if user_input[1]=="up" and right_paddle.y-right_paddle.vel>=0:
+                right_paddle.move(up=True)
+            if user_input[1]=="down" and right_paddle.y+right_paddle.vel+right_paddle.height<=HEIGHT:
+                right_paddle.move(up=False)
         else:
-            if user_input[1]=="up" and main().left_peddle.y-main().left_peddle.vel>=0:
-                main().left_peddle.move(up=True)
-            if user_input[1]=="up" and main().left_peddle.y+main().left_peddle.vel+main().left_peddle.height<=HEIGHT:
-                main().left_peddle.move(up=False)
+            if user_input[1]=="up" and left_paddle.y-left_paddle.vel>=0:
+                left_paddle.move(up=True)
+            if user_input[1]=="down" and left_paddle.y+left_paddle.vel+left_paddle.height<=HEIGHT:
+                left_paddle.move(up=False)
     
 
 def handle_collision(ball,left_paddle,right_paddle):
@@ -97,11 +99,17 @@ def main():
         clock.tick(FPS)
         #------for debugging
         #print(str(left_score)+','+str(right_score)+','+str(left_paddle.x)+','+str(left_paddle.y)+','+str(right_paddle.x)+','+str(right_paddle.y)+','+str(ball.x)+','+str(ball.y))
-        #time.sleep(0.1)
+        
         server_to_client(str(left_score)+','+str(right_score)+','+str(left_paddle.x)+','+str(left_paddle.y)+','+str(right_paddle.x)+','+str(right_paddle.y)+','+str(ball.x)+','+str(ball.y))
+        time.sleep(0.015)
         ball.move()
         handle_collision(ball,left_paddle,right_paddle)
-
+            #To receive userID we are sending request
+        for c in clients:
+            c.send('user_input'.encode('utf-8'))
+            user_input=c.recv(2048).decode('utf-8')
+            if user_input!="none":
+                move_paddle(user_input,left_paddle,right_paddle)
         if ball.x<=0:
             right_score+=1
             ball.reset()
@@ -146,10 +154,12 @@ def server_to_client(message):
     for c in clients:
         c.send(message.encode('utf-8'))
 
+#----------Need to use this to handle when user disconnects.
+"""
 def handle(client):
     while True:
         try:
-            data=client.recv(2048)
+            data=client.recv(2048).decode('utf-8')
             move_peddle(data)
         except:
             if client in clients:
@@ -158,7 +168,7 @@ def handle(client):
                 clients.remove(client)
                 client.close()
                 print(f'{user} left the game')
-                users.remove(user)
+                users.remove(user)"""
 
 def establish_connection():
     no_of_users=0
@@ -172,10 +182,12 @@ def establish_connection():
         print(f'User connected: {user_id} and address is {address}')
         no_of_users+=1
         
-        thread=threading.Thread(target=handle,args=(client,))
-        thread.start()
+        #thread=threading.Thread(target=handle,args=(client,))
+        #thread.start()
         if no_of_users==2:
             break
+        for c in clients:
+            print(c)
     main()
 
 print("Waiting for a connections, Server Started")
